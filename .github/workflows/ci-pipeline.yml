@@ -26,6 +26,9 @@ jobs:
   security-and-dependencies:
     name: Dependency & Security Checks
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./audex-sandbox-api
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -34,7 +37,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-          cache: 'npm'
 
       - name: Install Dependencies
         run: npm ci
@@ -47,7 +49,7 @@ jobs:
         uses: aquasecurity/trivy-action@master
         with:
           scan-type: 'fs'
-          scan-ref: '.'
+          scan-ref: './audex-sandbox-api'
           severity: 'CRITICAL,HIGH'
 
   # 3. تشغيل الاختبارات الآلية
@@ -55,6 +57,9 @@ jobs:
     name: Automated Tests
     runs-on: ubuntu-latest
     needs: [secrets-scan, security-and-dependencies]
+    defaults:
+      run:
+        working-directory: ./audex-sandbox-api
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -63,7 +68,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-          cache: 'npm'
 
       - name: Install Dependencies
         run: npm ci
@@ -76,4 +80,4 @@ jobs:
         if: always()
         with:
           name: code-coverage-report
-          path: coverage/
+          path: audex-sandbox-api/coverage/
