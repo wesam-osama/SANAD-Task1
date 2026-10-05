@@ -1,12 +1,46 @@
-SANAD Training Service — CI Pipeline Documentation
-Objective: Establish an automated DevSecOps CI Pipeline for SANAD training services covering secrets detection, security vulnerability checks, and automated unit testing with isolated database execution.
+#  SANAD — CI/CD & DevSecOps Pipeline
 
-Pipeline Configuration (.github/workflows/ci-pipeline.yml):
+> **Task 2 — Training Service CI Pipeline**  
+> An automated continuous integration and DevSecOps pipeline implemented for the **SANAD** healthcare platform, ensuring codebase security, secret detection, dependency scanning, and isolated automated testing.
 
-Secrets Detection Job: Executes Gitleaks to scan commit history and codebase for exposed hardcoded tokens, secret keys, or passwords.
+---
 
-Dependency & Security Checks Job: Uses NPM Audit to detect direct package vulnerabilities and Trivy to perform filesystem vulnerability analysis on high/critical security risks.
+##  Table of Contents
+- [Overview](#-overview)
+- [Pipeline Architecture](#-pipeline-architecture)
+- [Key Features & Security Controls](#-key-features--security-controls)
+- [Workflow Configuration](#-workflow-configuration)
+- [Execution & Verification (Evidence)](#-execution--verification-evidence)
+- [How to Run Locally](#-how-to-run-locally)
 
-Automated Testing Job: Spins up a dedicated MongoDB container service (mongo:6.0) within the GitHub Actions runner, executes Jest unit/integration tests (npm test), and automatically archives coverage reports as pipeline artifacts upon completion.
+---
 
-Pipeline Execution Result: All security checks, dependency audits, and test suites completed successfully with zero leaks and 100% pass status.
+##  Overview
+
+**SANAD** is an integrated doctor-patient medical services and private RAG platform. This repository demonstrates the implementation of a robust **CI Pipeline** for the SANAD backend service, designed to enforce strict security guardrails (Shift-Left Security) and automated testing prior to code integration.
+
+---
+
+##  Pipeline Architecture
+
+The CI pipeline runs automatically on every `push` and `pull_request` to the `main` and `develop` branches. It consists of three decoupled, parallel-friendly jobs:
+
+```text
+                  ┌──────────────────────────────┐
+                  │      GitHub Trigger          │
+                  │   (push / pull_request)      │
+                  └──────────────┬───────────────┘
+                                 │
+                 ┌───────────────┴───────────────┐
+                 │                               │
+                 ▼                               ▼
+    ┌────────────────────────┐      ┌──────────────────────────┐
+    │  Secrets Detection     │      │  Dependency & Security   │
+    │  (Gitleaks Engine)     │      │  (NPM Audit + Trivy FS)  │
+    └────────────────────────┘      └────────────┬─────────────┘
+                                                 │
+                                                 ▼
+                                    ┌──────────────────────────┐
+                                    │   Automated Testing      │
+                                    │   (Jest + MongoDB Svc)   │
+                                    └──────────────────────────┘
